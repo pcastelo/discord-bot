@@ -5,11 +5,9 @@ from discord.ui import Button, View
 from dotenv import load_dotenv
 import asyncio
 
-# Load path relative to the script location if needed, or just assume .env in root
-# Adjust path to find .env in parent directory
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from src.bot import PersistentRoleView # Updated View Name
+from src.bot import RoleIdentityView, SystemNotificationView # Updated Views
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -36,7 +34,7 @@ async def on_ready():
         await bot.close()
         return
 
-    # Target channel: 'roles' or 'configuración'
+    # Target channel: 'roles'
     channel_name = "roles"
     channel = discord.utils.get(category.text_channels, name=channel_name)
     
@@ -50,19 +48,24 @@ async def on_ready():
     else:
         print(f"Channel {channel_name} exists.")
 
-    # Send Panel
-    print("Deploying Unified Panel...")
-    embed = discord.Embed(title="🎛️ Panel de Configuración", description="Gestiona tus Roles y Notificaciones aquí.", color=0x00ff00)
-    embed.add_field(name="Identidad", value="🎮 **Gamers**: Acceso a canales de juegos.\n👋 **Invitados**: Acceso social básico.", inline=True)
-    embed.add_field(name="Alertas", value="📰 **Newsletter**: Noticias del proyecto.\n🛑 **Downtime**: Avisos de mantenimiento.", inline=True)
+    print("Purging old panels...")
+    try:
+        await channel.purge(limit=10) # Clean up previous tests
+    except:
+        pass
+
+    # 1. Identity Panel
+    print("Deploying Identity Panel...")
+    embed_id = discord.Embed(title="🎭 Roles de Identidad", description="Elige tus roles para acceder a los canales.", color=0x00ff00)
+    embed_id.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.\n👋 **Invitados**: Zona social.", inline=False)
+    await channel.send(embed=embed_id, view=RoleIdentityView())
     
-    await channel.send(embed=embed, view=PersistentRoleView())
-    print("✅ Unified Panel Sent!")
+    # 2. Notification Panel
+    print("Deploying Notification Panel...")
+    embed_notif = discord.Embed(title="🔔 Notificaciones del Sistema", description="Suscríbete a las alertas que te interesen.", color=0xe74c3c)
+    embed_notif.add_field(name="Alertas", value="📰 **Newsletter**: Novedades del proyecto.\n🛑 **Downtime**: Avisos de mantenimiento.\n🚀 **Releases**: Nuevas features del bot.", inline=False)
+    await channel.send(embed=embed_notif, view=SystemNotificationView())
+    
+    print("✅ All Panels Sent!")
     
     await bot.close()
-
-if __name__ == "__main__":
-    if not TOKEN:
-        print("Error: DISCORD_TOKEN not found in environment.")
-    else:
-        bot.run(TOKEN)

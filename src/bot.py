@@ -220,5 +220,34 @@ async def Gaming(ctx):
     
     await target_channel.send(f"🎮 **Gaming Time** {mention} by {ctx.author.mention}!")
 
+@bot.event
+async def on_presence_update(before, after):
+    # FEATURE 6: STREAM ALERT
+    # User must have "Gamers" role
+    role_gamers = discord.utils.get(after.guild.roles, name="Gamers")
+    if role_gamers not in after.roles:
+        return
+
+    # Check if started streaming
+    is_streaming = isinstance(after.activity, discord.Streaming)
+    was_streaming = isinstance(before.activity, discord.Streaming)
+
+    if is_streaming and not was_streaming:
+        # User started streaming
+        stream_url = after.activity.url
+        stream_name = after.activity.name # e.g. "Playing Minecraft" or stream title
+        
+        # Find #chat-gaming
+        category = discord.utils.get(after.guild.categories, name="🎮 GAMING")
+        if not category:
+             category = discord.utils.get(after.guild.categories, name="GAMING")
+        
+        target_channel = None
+        if category:
+            target_channel = discord.utils.get(category.text_channels, name="chat-gaming")
+        
+        if target_channel:
+             await target_channel.send(f"🔴 **¡{after.mention} está en directo!**\n📺 **{stream_name}**\n🔗 {stream_url}")
+
 if __name__ == "__main__":
     bot.run(TOKEN)

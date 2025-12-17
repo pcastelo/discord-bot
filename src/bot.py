@@ -49,10 +49,6 @@ class RoleIdentityView(View):
     async def estudio_button(self, interaction: discord.Interaction, button: Button):
         await self.toggle_role(interaction, "Estudio", "📚")
 
-    @discord.ui.button(label="Invitados", style=discord.ButtonStyle.secondary, custom_id="role_invitados", emoji="👋")
-    async def invitados_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role(interaction, "Invitados", "👋")
-
 
 class SystemNotificationView(View):
     def __init__(self):
@@ -421,7 +417,7 @@ async def addSound(ctx, name: str):
 @commands.has_permissions(administrator=True)
 async def setup_roles(ctx):
     embed = discord.Embed(title="🎭 Roles de Identidad", description="Elige tus roles para acceder a los canales.", color=0x00ff00)
-    embed.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.\n👋 **Invitados**: Zona social.", inline=False)
+    embed.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.", inline=False)
     await ctx.send(embed=embed, view=RoleIdentityView())
 
 @bot.command()

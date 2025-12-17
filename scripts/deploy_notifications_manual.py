@@ -7,7 +7,7 @@ import asyncio
 
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from src.bot import RoleIdentityView, SystemNotificationView # Updated Views
+from src.bot import RoleIdentityView, SystemNotificationView 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -48,16 +48,16 @@ async def on_ready():
     else:
         print(f"Channel {channel_name} exists.")
 
-    print("Purging old panels...")
+    print("Purging old panels (Limit 100)...")
     try:
-        await channel.purge(limit=10) # Clean up previous tests
-    except:
-        pass
+        await channel.purge(limit=100) 
+    except Exception as e:
+        print(f"Purge error: {e}")
 
     # 1. Identity Panel
     print("Deploying Identity Panel...")
     embed_id = discord.Embed(title="🎭 Roles de Identidad", description="Elige tus roles para acceder a los canales.", color=0x00ff00)
-    embed_id.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.\n👋 **Invitados**: Zona social.", inline=False)
+    embed_id.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.", inline=False)
     await channel.send(embed=embed_id, view=RoleIdentityView())
     
     # 2. Notification Panel
@@ -69,3 +69,9 @@ async def on_ready():
     print("✅ All Panels Sent!")
     
     await bot.close()
+
+if __name__ == "__main__":
+    if not TOKEN:
+        print("Error: DISCORD_TOKEN not found in environment.")
+    else:
+        bot.run(TOKEN)

@@ -38,8 +38,18 @@ Desplegado en VPS (Docker).
     - Asigna roles por un número de días determinado.
     - Persistencia en `temp_roles.json` (sobrevive reinicios).
     - Verificación automática cada 1 hora.
+- **Roles Temporales (`!tempRole`):**
+    - Asigna roles por un número de días determinado.
+    - Persistencia en `temp_roles.json` (sobrevive reinicios).
+    - Verificación automática cada 1 hora.
 - **Gestión de Emojis (`!addEmoji`):**
     - Permite añadir emojis desde URLs externas o adjuntos directamente.
+- **Notificaciones Selectivas (`!setup_notifications`):**
+    - Roles auto-gestionables: `Downtime`, `Newsletter`, `Releases`.
+    - Seguridad: Roles creados como `mentionable=False` (Anti-Ping).
+    - **Protección Global**: El bot bloquea automáticamente la mención masiva `@everyone` al iniciarse.
+- **Soundboard (`!addSound`):**
+    - Sube archivos de audio (MP3) directamente al panel de sonidos del servidor.
 
 ### 6. Estadísticas en Tiempo Real
 - **Ubicación:** Canales de voz (bloqueados) en categoría INFORMACIÓN.

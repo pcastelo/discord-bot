@@ -42,6 +42,8 @@ Estos comandos son para configuración inicial y mantenimiento.
 - **`!clear [n]`**: Borra los últimos `n` mensajes del chat (Ej: `!clear 10`).
 - **`!tempRole "Rol" @Users 7`**: Asigna un rol (ej: "Vip") a usuarios por X días.
 - **`!addEmoji nombre [URL/Adjunto]`**: Roba un emoji desde un enlace o subiendo la foto.
+- **`!addSound nombre [Adjunto]`**: Sube un MP3 al Soundboard nativo del server.
+- **`!setup_notifications`**: Crea el panel de alertas (Downtime/Newsletter/Releases).
 
 ---
 

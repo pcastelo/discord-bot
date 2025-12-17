@@ -55,7 +55,7 @@ class PersistentRoleView(View):
 
 class SuperBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix='!', intents=intents)
+        super().__init__(command_prefix='!', intents=intents, help_command=None) # Disable default help
         self.persistent_views_added = False
 
     async def on_ready(self):
@@ -122,10 +122,14 @@ class SuperBot(commands.Bot):
             print(f"Created temp channel: {channel_name}")
 
         # 2. DELETE EMPTY TEMPORARY CHANNEL
-        # We need a way to identify if it is temporary. 
-        # Strategy: Checks if channel starts with "Sala de" and is empty.
-        if before.channel and before.channel.name.startswith("Sala de "):
+        # Strategy: Checks if channel starts with "Sala de" OR checks permission overwrite for owner presence
+        # Simplified: Check names or if created by bot (harder without DB). 
+        # For now, stick to "Sala de" heuristic or check if it was dynamic.
+        if before.channel and (before.channel.name.startswith("Sala de ") or before.channel.name.startswith("🔊 ")): 
+            # Added "🔊 " check for renamed channels
             if len(before.channel.members) == 0:
+                # Double check it is a temp channel (has permission overwrite for a member?)
+                # Safety: Only delete if it looks like a user room.
                 await before.channel.delete()
                 print(f"Deleted empty temp channel: {before.channel.name}")
 
@@ -174,6 +178,88 @@ class SuperBot(commands.Bot):
                 await chan_voice.edit(name=f"🎧 Activos: {voice_count}")
 
 bot = SuperBot()
+
+# --- COMMANDS ---
+
+@bot.command()
+async def help(ctx):
+    embed = discord.Embed(title="🤖 Comandos de La Villa", color=0x3498db)
+    
+    embed.add_field(name="🎮 Gaming", value="`!gaming` - Avisa a los Gamers (Solo en #chat-gaming)", inline=False)
+    embed.add_field(name="🔊 Voz", value="`!room [nombre]` - Cambia el nombre de tu sala temporal", inline=False)
+    embed.add_field(name="🖼️ Utilidad", value="`!avatar @user` - Ver foto de perfil\n`!poll \"Pregunta\" \"Opción1\"...` - Crear encuesta", inline=False)
+    
+    if ctx.author.guild_permissions.administrator:
+        embed.add_field(name="🛡️ Admin", value="`!setup_roles` - Panel de Roles\n`!setup_voice` - Configurar Voz\n`!clear [n]` - Borrar mensajes", inline=False)
+    
+    await ctx.send(embed=embed)
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    if not member:
+        member = ctx.author
+    embed = discord.Embed(title=f"Avatar de {member.display_name}", color=member.color)
+    embed.set_image(url=member.display_avatar.url)
+    await ctx.send(embed=embed)
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def clear(ctx, amount: int):
+    await ctx.channel.purge(limit=amount + 1)
+    await ctx.send(f"🧹 Borrados {amount} mensajes.", delete_after=3)
+
+@bot.command()
+async def poll(ctx, question, *options):
+    if len(options) == 0:
+        await ctx.send("❌ Uso: `!poll \"Pregunta\" \"Opcion A\" \"Opcion B\"`")
+        return
+    if len(options) > 10:
+        await ctx.send("❌ Máximo 10 opciones.")
+        return
+
+    reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+    
+    description = []
+    for x, option in enumerate(options):
+        description.append(f"{reactions[x]} {option}")
+    
+    embed = discord.Embed(title=f"📊 {question}", description="\n\n".join(description), color=0xffd700)
+    embed.set_footer(text=f"Encuesta iniciada por {ctx.author.display_name}")
+    
+    poll_msg = await ctx.send(embed=embed)
+    for i in range(len(options)):
+        await poll_msg.add_reaction(reactions[i])
+
+@bot.command()
+async def room(ctx, *, new_name):
+    # Check if user is in a voice channel
+    if not ctx.author.voice or not ctx.author.voice.channel:
+        await ctx.send("❌ Debes estar en un canal de voz.", delete_after=5)
+        return
+
+    channel = ctx.author.voice.channel
+    
+    # Check if authorized (Owner permissions logic handled by having Manage Channels allow)
+    # However, create_voice_channel gave them manage_channels, so we can check that.
+    permissions = channel.permissions_for(ctx.author)
+    if not permissions.manage_channels:
+         await ctx.send("❌ No eres el dueño de esta sala.", delete_after=5)
+         return
+
+    # Check if it's a dynamic channel (starts with Sala de... or 🔊) based on pattern
+    # Just allow renaming if they have permission, honestly. Safer.
+    
+    try:
+        # Add a prefix to keep it recognizable for cleanup
+        name_to_set = f"🔊 {new_name}"
+        await channel.edit(name=name_to_set)
+        await ctx.send(f"✅ Sala renombrada a **{name_to_set}**", delete_after=5)
+    except discord.RateLimited:
+         await ctx.send("⏳ Discord limita los cambios de nombre (2 veces cada 10 min). Espera un poco.", delete_after=10)
+    except Exception as e:
+         print(f"Error renaming room: {e}")
+         await ctx.send("❌ Error cambiando el nombre.", delete_after=5)
+
 
 @bot.command()
 @commands.has_permissions(administrator=True)

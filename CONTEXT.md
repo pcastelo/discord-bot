@@ -23,15 +23,22 @@ Desplegado en VPS (Docker).
 - **Persistencia:** Los botones funcionan tras reinicios del bot.
 
 ### 3. Voz Dinámica
-- **Trigger:** Usuario entra al canal de voz `➕ Crear Sala` (Categoría GAMING).
-- **Acción:** Crea un canal temporal privado. Se borra automáticamente al vaciarse.
+- **Trigger:** Usuario entra al canal de voz `➕ Crear Sala`.
+- **Acción:** Crea un canal temporal privado.
+- **Comando `!room`:** El creador puede renombrar su sala. El bot añade el prefijo `🔊 ` para identificarla.
 
-### 4. Estadísticas en Tiempo Real
+### 4. Utilidades Sociales
+- **`!poll`:** Genera encuestas con reacciones automáticas (1-10 opciones).
+- **`!avatar`:** Muestra el avatar de alta resolución.
+- **`!help`:** Embed dinámico con ayuda visual.
+- **`!clear`:** Herramienta de moderación para limpiar mensajes.
+
+### 5. Estadísticas en Tiempo Real
 - **Ubicación:** Canales de voz (bloqueados) en categoría INFORMACIÓN.
 - **Métricas:** `👥 Miembros`, `🟢 Online`, `🎧 Activos`.
 - **Actualización:** Cada 6 minutos (Loop task).
 
-### 5. Gaming Hub (`#chat-gaming`)
+### 6. Gaming Hub (`#chat-gaming`)
 - **Comando `!gaming`:**
     - **Uso:** `!gaming` (o `!Gaming`).
     - **Efecto:** Menciona al rol `@Gamers` con un mensaje de "Gaming Time".
@@ -40,7 +47,7 @@ Desplegado en VPS (Docker).
     - **Trigger:** Un usuario con rol `Gamers` comienza a transmitir (Twitch/YouTube).
     - **Acción:** Envía un aviso automático a `#chat-gaming` con el link del stream.
 
-### 6. Soporte Multi-Servidor ("Open Source Santiago")
+### 7. Soporte Multi-Servidor ("Open Source Santiago")
 - **Capacidad:** El proyecto incluye scripts de mantenimiento para un segundo servidor.
 - **Funciones:**
     - Reorganización de canales (Script `scripts/`).

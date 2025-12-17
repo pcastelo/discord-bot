@@ -4,11 +4,21 @@ Este es el bot privado del servidor **La Villa**. Aquí tienes la lista de coman
 
 ## 🎮 Comandos para Usuarios
 
-### `!gaming`
-Avisa a todos los **Gamers** para jugar.
-- **Uso:** Escribe `!gaming` o `!Gaming`.
-- **Dónde:** Solo funciona en el canal **`#chat-gaming`**.
-- **Notas:** Si lo usas en otro canal, tu mensaje será borrado.
+### `!room [nombre]`
+Personaliza el nombre de tu sala de voz temporal.
+- **Uso:** `!room Cine de Terror`
+- **Requisito:** Debes estar en tu sala creada con "➕ Crear Sala".
+
+### `!poll "Pregunta" "Opcion 1" "Opcion 2"`
+Crea una encuesta automática con reacciones.
+- **Uso:** `!poll "¿Jugamos LoL?" "Si" "No" "Quizás"`
+- **Nota:** Las opciones deben ir entre comillas.
+
+### `!avatar @usuario`
+Muestra la foto de perfil en grande de un usuario.
+
+### `!help`
+Muestra una lista bonita con todos los comandos disponibles.
 
 ---
 
@@ -17,9 +27,9 @@ Avisa a todos los **Gamers** para jugar.
 | Función | Descripción |
 | :--- | :--- |
 | **👋 Bienvenida** | Te saluda con una imagen personalizada al entrar. |
-| **🎙️ Crear Sala** | Únete al canal de voz **"➕ Crear Sala"** para crear tu propio canal de voz temporal. |
-| **📺 Alerta Stream** | Si tienes el rol `Gamers` y prendes stream (Twitch/YouTube), el bot avisa en `#chat-gaming`. |
-| **📊 Estadísticas** | Contadores en tiempo real: `Miembros`, `Online` y `🎧 Voz` (se actualiza cada 6 min). |
+| **🎙️ Crear Sala** | Únete a **"➕ Crear Sala"** para crear tu canal temporal. Puedes renombrarlo con `!room`. |
+| **📺 Alerta Stream** | Si tienes el rol `Gamers` y prendes stream, el bot avisa en `#chat-gaming`. |
+| **📊 Estadísticas** | Contadores en tiempo real: `Miembros`, `Online` y `🎧 Voz` (cada 6 min). |
 
 ---
 
@@ -27,8 +37,9 @@ Avisa a todos los **Gamers** para jugar.
 
 Estos comandos son para configuración inicial y mantenimiento.
 
-- **`!setup_roles`**: Crea el panel de botones para auto-asignarse roles en el canal actual.
-- **`!setup_voice`**: Crea el canal de voz generador "Crear Sala" en la categoría GAMING.
+- **`!setup_roles`**: Crea el panel de botones para auto-asignarse roles.
+- **`!setup_voice`**: Crea el canal generador de salas.
+- **`!clear [n]`**: Borra los últimos `n` mensajes del chat (Ej: `!clear 10`).
 
 ---
 

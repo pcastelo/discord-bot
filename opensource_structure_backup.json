@@ -1,0 +1,226 @@
+{
+    "timestamp": "2025-12-16 23:57:25.262615",
+    "guild_id": 1161994306828128346,
+    "categories": [
+        {
+            "id": 1161994309353078805,
+            "name": "Text Channels",
+            "position": 0
+        },
+        {
+            "id": 1161994309353078806,
+            "name": "Voice Channels",
+            "position": 1
+        }
+    ],
+    "channels": [
+        {
+            "id": 1161994309353078807,
+            "name": "🌐general",
+            "type": "text",
+            "position": 4,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1161994309944496218,
+            "name": "General",
+            "type": "voice",
+            "position": 0,
+            "category_name": "Voice Channels",
+            "category_id": 1161994309353078806
+        },
+        {
+            "id": 1161994500684664923,
+            "name": "💻development",
+            "type": "text",
+            "position": 6,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1161994541159690260,
+            "name": "☁cloud",
+            "type": "text",
+            "position": 7,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1161994600001589308,
+            "name": "🔄devops",
+            "type": "text",
+            "position": 8,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1161994647393026078,
+            "name": "🌀gitops",
+            "type": "text",
+            "position": 9,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1161999017857798216,
+            "name": "👋welcome",
+            "type": "text",
+            "position": 3,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1166797866455531550,
+            "name": "📅eventos",
+            "type": "text",
+            "position": 10,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1167157174200451163,
+            "name": "must-read",
+            "type": "text",
+            "position": 0,
+            "category_name": null,
+            "category_id": null
+        },
+        {
+            "id": 1167157174200451164,
+            "name": "moderator-only",
+            "type": "text",
+            "position": 2,
+            "category_name": null,
+            "category_id": null
+        },
+        {
+            "id": 1167162928739385434,
+            "name": "ossantiago-public",
+            "type": "news",
+            "position": 17,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1167163062021799966,
+            "name": "cowork-main-room",
+            "type": "voice",
+            "position": 1,
+            "category_name": "Voice Channels",
+            "category_id": 1161994309353078806
+        },
+        {
+            "id": 1167165749975072858,
+            "name": "afk",
+            "type": "voice",
+            "position": 2,
+            "category_name": "Voice Channels",
+            "category_id": 1161994309353078806
+        },
+        {
+            "id": 1167166306961850389,
+            "name": "🔔notificaciones",
+            "type": "text",
+            "position": 5,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1177932095818059837,
+            "name": "🎮game-development",
+            "type": "text",
+            "position": 11,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1178845034905342003,
+            "name": "governing-board-room",
+            "type": "voice",
+            "position": 3,
+            "category_name": "Voice Channels",
+            "category_id": 1161994309353078806
+        },
+        {
+            "id": 1181626207238901871,
+            "name": "🎓certifications",
+            "type": "text",
+            "position": 12,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1182320174230151289,
+            "name": "brainstorming-topic-roadmap",
+            "type": "text",
+            "position": 18,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1183899531134390333,
+            "name": "turnos-community-managers",
+            "type": "text",
+            "position": 19,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1204438323620225054,
+            "name": "oss-stage",
+            "type": "stage_voice",
+            "position": 0,
+            "category_name": null,
+            "category_id": null
+        },
+        {
+            "id": 1244636255569055786,
+            "name": "🧗leveling-playground",
+            "type": "text",
+            "position": 15,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1248667847048040531,
+            "name": "🤖ai",
+            "type": "text",
+            "position": 13,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1266779424695779428,
+            "name": "🎴anime-manga",
+            "type": "text",
+            "position": 14,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        },
+        {
+            "id": 1266815374154924156,
+            "name": "gamer-mode",
+            "type": "voice",
+            "position": 4,
+            "category_name": "Voice Channels",
+            "category_id": 1161994309353078806
+        },
+        {
+            "id": 1417092939758174313,
+            "name": "forum-discussion",
+            "type": "forum",
+            "position": 1,
+            "category_name": null,
+            "category_id": null
+        },
+        {
+            "id": 1426369824904187915,
+            "name": "🤪off-topic",
+            "type": "text",
+            "position": 16,
+            "category_name": "Text Channels",
+            "category_id": 1161994309353078805
+        }
+    ]
+}

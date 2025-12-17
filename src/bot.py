@@ -213,7 +213,11 @@ async def Gaming(ctx):
         target_channel = await guild.create_text_channel("chat-gaming", category=category, overwrites=overwrites)
     
     # Send Message
-    await target_channel.send(f"🎮 **Gaming Time** @everyone by {ctx.author.mention}!")
+    # Find Role Gamers
+    role_gamers = discord.utils.get(guild.roles, name="Gamers")
+    mention = role_gamers.mention if role_gamers else "@everyone"
+    
+    await target_channel.send(f"🎮 **Gaming Time** {mention} by {ctx.author.mention}!")
     
     # Feedback to user if they ran it elsewhere
     if ctx.channel != target_channel:

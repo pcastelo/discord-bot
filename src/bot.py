@@ -17,6 +17,7 @@ intents.members = True
 intents.message_content = True
 intents.voice_states = True
 intents.guilds = True
+intents.presences = True
 
 class PersistentRoleView(View):
     def __init__(self):

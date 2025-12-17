@@ -129,7 +129,7 @@ class SuperBot(commands.Bot):
                 await before.channel.delete()
                 print(f"Deleted empty temp channel: {before.channel.name}")
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=6)
     async def update_stats(self):
         # FEATURE 4: SERVER STATS
         guild = self.get_guild(GUILD_ID)

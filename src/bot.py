@@ -193,7 +193,11 @@ async def Gaming(ctx):
     # FEATURE 5: GAMING ALERT
     # Restriction: Only in #chat-gaming
     if ctx.channel.name != "chat-gaming":
-        await ctx.send("❌ Este comando solo funciona en #chat-gaming.", delete_after=5)
+        try:
+            await ctx.message.delete() # Delete the user's message
+        except:
+            pass # Ignore if permission missing
+        await ctx.send("❌ Este comando solo funciona en #chat-gaming.", delete_after=300) # 5 minutes
         return
 
     guild = ctx.guild

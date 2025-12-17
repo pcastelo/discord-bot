@@ -24,39 +24,50 @@ intents.voice_states = True
 intents.guilds = True
 intents.presences = True
 
-    async def toggle_role(self, interaction: discord.Interaction, role_name: str, emoji: str):
+class PersistentRoleView(View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    async def toggle_role(self, interaction: discord.Interaction, role_name: str, emoji: str, create_if_missing=False):
         role = discord.utils.get(interaction.guild.roles, name=role_name)
-        if not role:
-            # Auto-create if missing. mentionable=False is safer for alerts, 
-            # but for Gaming/Social we might want mentions.
-            # We'll assume Newsletter/Downtime are strict alerts (False) and others might exist.
-            role = await interaction.guild.create_role(name=role_name, mentionable=False, reason="Auto-created Notification Role")
+        if not role and create_if_missing:
+            # Auto-create alert roles as non-mentionable (except by admin)
+            role = await interaction.guild.create_role(name=role_name, mentionable=False, reason="Auto-created Role")
         
+        if not role:
+             await interaction.response.send_message(f"❌ El rol **{role_name}** no existe y no se puede crear automáticamente.", ephemeral=True)
+             return
+
         if role in interaction.user.roles:
             await interaction.user.remove_roles(role)
-            await interaction.response.send_message(f"🔕 Ya no recibirás notificaciones de **{role_name}**.", ephemeral=True)
+            await interaction.response.send_message(f"❌ Te has quitado el rol **{role_name}**.", ephemeral=True)
         else:
             await interaction.user.add_roles(role)
-            await interaction.response.send_message(f"🔔 Notificaciones de **{role_name}** activadas.", ephemeral=True)
+            await interaction.response.send_message(f"✅ {emoji} Rol **{role_name}** activado.", ephemeral=True)
 
-    @discord.ui.button(label="Gaming Pings", style=discord.ButtonStyle.primary, custom_id="notif_gaming", emoji="🎮")
-    async def gaming_button(self, interaction: discord.Interaction, button: Button):
-        # Maps to 'Gamers' role
+    @discord.ui.button(label="Gamers", style=discord.ButtonStyle.primary, custom_id="role_gamers", emoji="🎮")
+    async def gamer_button(self, interaction: discord.Interaction, button: Button):
         await self.toggle_role(interaction, "Gamers", "🎮")
 
-    @discord.ui.button(label="Social Pings", style=discord.ButtonStyle.success, custom_id="notif_social", emoji="🗣️")
-    async def social_button(self, interaction: discord.Interaction, button: Button):
-        # Maps to 'Invitados' or new 'Social' role? Let's use 'Invitados' as proxy or create 'Social'
-        await self.toggle_role(interaction, "Social", "🗣️")
+    @discord.ui.button(label="Estudio", style=discord.ButtonStyle.success, custom_id="role_estudio", emoji="📚")
+    async def estudio_button(self, interaction: discord.Interaction, button: Button):
+        await self.toggle_role(interaction, "Estudio", "📚")
 
-    @discord.ui.button(label="Newsletter", style=discord.ButtonStyle.secondary, custom_id="notif_newsletter", emoji="📰")
+    @discord.ui.button(label="Invitados", style=discord.ButtonStyle.secondary, custom_id="role_invitados", emoji="👋")
+    async def invitados_button(self, interaction: discord.Interaction, button: Button):
+        await self.toggle_role(interaction, "Invitados", "👋")
+
+    @discord.ui.button(label="Newsletter", style=discord.ButtonStyle.primary, custom_id="notif_newsletter", emoji="📰", row=1)
     async def newsletter_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role(interaction, "Newsletter", "📰")
-    
-    @discord.ui.button(label="Silenciar Todo", style=discord.ButtonStyle.danger, custom_id="notif_silence", emoji="🔇")
+        await self.toggle_role(interaction, "Newsletter", "📰", create_if_missing=True)
+
+    @discord.ui.button(label="Downtime", style=discord.ButtonStyle.danger, custom_id="notif_downtime", emoji="🛑", row=1)
+    async def downtime_button(self, interaction: discord.Interaction, button: Button):
+        await self.toggle_role(interaction, "Downtime", "🛑", create_if_missing=True)
+
+    @discord.ui.button(label="Limpiar Todo", style=discord.ButtonStyle.danger, custom_id="notif_silence", emoji="🗑️", row=2)
     async def silence_all(self, interaction: discord.Interaction, button: Button):
-        # Remove all notification roles
-        roles_to_remove = ["Gamers", "Social", "Newsletter", "Downtime", "Releases"]
+        roles_to_remove = ["Gamers", "Estudio", "Invitados", "Newsletter", "Downtime", "Releases"]
         removed = []
         for r_name in roles_to_remove:
             role = discord.utils.get(interaction.guild.roles, name=r_name)
@@ -65,33 +76,9 @@ intents.presences = True
                 removed.append(r_name)
         
         if removed:
-            await interaction.response.send_message(f"🔇 Se han desactivado: {', '.join(removed)}", ephemeral=True)
+            await interaction.response.send_message(f"🗑️ Roles eliminados: {', '.join(removed)}", ephemeral=True)
         else:
-            await interaction.response.send_message("🤷 No tenías ninguna notificación activa.", ephemeral=True)
-
-class PersistentRoleView(View):
-    def __init__(self):
-        super().__init__(timeout=None) # Persistent
-
-    # Keeping original role view for setup_roles if needed, but Notifications covers pings now.
-    # We will leave setup_roles as "Category/Access" roles and setup_notifications as "Ping" roles.
-    @discord.ui.button(label="Gamers", style=discord.ButtonStyle.primary, custom_id="role_gamers_access", emoji="🎮")
-    async def gamer_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role_access(interaction, "Gamers")
-
-    @discord.ui.button(label="Estudio", style=discord.ButtonStyle.success, custom_id="role_estudio_access", emoji="📚")
-    async def estudio_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role_access(interaction, "Estudio")
-        
-    async def toggle_role_access(self, interaction, role_name):
-         role = discord.utils.get(interaction.guild.roles, name=role_name)
-         if role in interaction.user.roles:
-             await interaction.user.remove_roles(role)
-             await interaction.response.send_message(f"❌ Rol **{role_name}** eliminado.", ephemeral=True)
-         else:
-             await interaction.user.add_roles(role)
-             await interaction.response.send_message(f"✅ Rol **{role_name}** añadido.", ephemeral=True)
-
+            await interaction.response.send_message("🤷 No tenías roles activos.", ephemeral=True)
 
 class SuperBot(commands.Bot):
     def __init__(self):
@@ -102,7 +89,6 @@ class SuperBot(commands.Bot):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         if not self.persistent_views_added:
             self.add_view(PersistentRoleView())
-            self.add_view(NotificationView()) # Add Notifications View
             self.persistent_views_added = True
         
         # Start Loops
@@ -430,16 +416,10 @@ async def addSound(ctx, name: str):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_roles(ctx):
-    embed = discord.Embed(title="🎭 Auto-asignación de Roles", description="Haz click en los botones para obtener tus roles.", color=0x00ff00)
+    embed = discord.Embed(title="🎛️ Panel de Configuración", description="Gestiona tus Roles y Notificaciones aquí.", color=0x00ff00)
+    embed.add_field(name="Identidad", value="🎮 **Gamers**: Acceso a canales de juegos.\n👋 **Invitados**: Acceso social básico.", inline=True)
+    embed.add_field(name="Alertas", value="📰 **Newsletter**: Noticias del proyecto.\n🛑 **Downtime**: Avisos de mantenimiento.", inline=True)
     await ctx.send(embed=embed, view=PersistentRoleView())
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def setup_notifications(ctx):
-    # FEATURE: NOTIFICATION PANEL
-    embed = discord.Embed(title="🔔 Centro de Notificaciones", description="Elige qué notificaciones quieres recibir.", color=0xe74c3c)
-    embed.add_field(name="Opciones", value="🛑 **Downtime**: Mantenimiento del servidor.\n📰 **Newsletter**: Novedades y noticias.\n🚀 **Releases**: Nuevas características del bot.", inline=False)
-    await ctx.send(embed=embed, view=NotificationView())
 
 @bot.command()
 @commands.has_permissions(administrator=True)

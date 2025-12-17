@@ -12,4 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "bot.py"]
+# Run from root, easy python path resolution
+CMD ["python", "src/bot.py"]

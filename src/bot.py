@@ -5,11 +5,16 @@ from discord.ui import Button, View
 from dotenv import load_dotenv
 from easy_pil import Editor, Canvas, Font, load_image_async
 import asyncio
+import json
+import aiohttp
+import io
+from datetime import datetime, timedelta
 
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD_ID = int(os.getenv('GUILD_ID'))
+TEMP_ROLES_FILE = "temp_roles.json"
 
 # Intents
 intents = discord.Intents.default()
@@ -64,11 +69,13 @@ class SuperBot(commands.Bot):
             self.add_view(PersistentRoleView())
             self.persistent_views_added = True
         
-        # Start Stats Loop
+        # Start Loops
         if not self.update_stats.is_running():
             self.update_stats.start()
         
-        # Start Voice Cleanup Loop
+        if not self.check_temp_roles.is_running():
+            self.check_temp_roles.start()
+            
         print("Bot is Ready!")
 
     async def on_member_join(self, member):
@@ -122,14 +129,8 @@ class SuperBot(commands.Bot):
             print(f"Created temp channel: {channel_name}")
 
         # 2. DELETE EMPTY TEMPORARY CHANNEL
-        # Strategy: Checks if channel starts with "Sala de" OR checks permission overwrite for owner presence
-        # Simplified: Check names or if created by bot (harder without DB). 
-        # For now, stick to "Sala de" heuristic or check if it was dynamic.
         if before.channel and (before.channel.name.startswith("Sala de ") or before.channel.name.startswith("🔊 ")): 
-            # Added "🔊 " check for renamed channels
             if len(before.channel.members) == 0:
-                # Double check it is a temp channel (has permission overwrite for a member?)
-                # Safety: Only delete if it looks like a user room.
                 await before.channel.delete()
                 print(f"Deleted empty temp channel: {before.channel.name}")
 
@@ -141,11 +142,7 @@ class SuperBot(commands.Bot):
 
         member_count = guild.member_count
         online_count = sum(1 for m in guild.members if m.status != discord.Status.offline and not m.bot)
-
-        # Look for channels or create them
-        # We look for a Locked Voice Channel
         
-        # Helper to find or create
         category = discord.utils.get(guild.categories, name="📌 INFORMACIÓN")
         if not category: return
 
@@ -177,6 +174,45 @@ class SuperBot(commands.Bot):
             if chan_voice.name != f"🎧 Activos: {voice_count}":
                 await chan_voice.edit(name=f"🎧 Activos: {voice_count}")
 
+    @tasks.loop(minutes=60)
+    async def check_temp_roles(self):
+        # FEATURE: TEMP ROLES CHECKER
+        if not os.path.exists(TEMP_ROLES_FILE):
+             return
+            
+        try:
+            with open(TEMP_ROLES_FILE, "r") as f:
+                temp_roles = json.load(f)
+        except:
+            temp_roles = []
+            
+        guild = self.get_guild(GUILD_ID)
+        if not guild: return
+        
+        now = datetime.now()
+        updated_roles = []
+        
+        for entry in temp_roles:
+            expiration = datetime.fromisoformat(entry['expires_at'])
+            if now > expiration:
+                # Expired: Remove Role
+                member = guild.get_member(entry['user_id'])
+                if member:
+                    role = guild.get_role(entry['role_id'])
+                    if role:
+                        try:
+                             await member.remove_roles(role)
+                             print(f"Expired Temp Role: Removed {role.name} from {member.display_name}")
+                        except Exception as e:
+                             print(f"Error removing role: {e}")
+            else:
+                updated_roles.append(entry)
+        
+        # Save updates
+        if len(updated_roles) != len(temp_roles):
+             with open(TEMP_ROLES_FILE, "w") as f:
+                 json.dump(updated_roles, f)
+
 bot = SuperBot()
 
 # --- COMMANDS ---
@@ -190,7 +226,7 @@ async def help(ctx):
     embed.add_field(name="🖼️ Utilidad", value="`!avatar @user` - Ver foto de perfil\n`!poll \"Pregunta\" \"Opción1\"...` - Crear encuesta", inline=False)
     
     if ctx.author.guild_permissions.administrator:
-        embed.add_field(name="🛡️ Admin", value="`!setup_roles` - Panel de Roles\n`!setup_voice` - Configurar Voz\n`!clear [n]` - Borrar mensajes", inline=False)
+        embed.add_field(name="🛡️ Admin", value="`!setup_roles` - Panel\n`!setup_voice` - Voz\n`!clear [n]` - Borrar\n`!tempRole` - Roles temporales\n`!addEmoji` - Añadir Emoji", inline=False)
     
     await ctx.send(embed=embed)
 
@@ -228,29 +264,21 @@ async def poll(ctx, question, *options):
     
     poll_msg = await ctx.send(embed=embed)
     for i in range(len(options)):
-        await poll_msg.add_reaction(reactions[i])
+         await poll_msg.add_reaction(reactions[i])
 
 @bot.command()
 async def room(ctx, *, new_name):
-    # Check if user is in a voice channel
     if not ctx.author.voice or not ctx.author.voice.channel:
         await ctx.send("❌ Debes estar en un canal de voz.", delete_after=5)
         return
 
     channel = ctx.author.voice.channel
-    
-    # Check if authorized (Owner permissions logic handled by having Manage Channels allow)
-    # However, create_voice_channel gave them manage_channels, so we can check that.
     permissions = channel.permissions_for(ctx.author)
     if not permissions.manage_channels:
          await ctx.send("❌ No eres el dueño de esta sala.", delete_after=5)
          return
-
-    # Check if it's a dynamic channel (starts with Sala de... or 🔊) based on pattern
-    # Just allow renaming if they have permission, honestly. Safer.
     
     try:
-        # Add a prefix to keep it recognizable for cleanup
         name_to_set = f"🔊 {new_name}"
         await channel.edit(name=name_to_set)
         await ctx.send(f"✅ Sala renombrada a **{name_to_set}**", delete_after=5)
@@ -260,18 +288,85 @@ async def room(ctx, *, new_name):
          print(f"Error renaming room: {e}")
          await ctx.send("❌ Error cambiando el nombre.", delete_after=5)
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def tempRole(ctx, role_name: str, members: commands.Greedy[discord.Member], days: int):
+    # Search for the role
+    role = discord.utils.get(ctx.guild.roles, name=role_name)
+    if not role:
+        await ctx.send(f"❌ No encuentro el rol: **{role_name}**")
+        return
+
+    if not members:
+        await ctx.send("❌ Debes mencionar al menos a un usuario. Uso: `!tempRole Admin @User 7`")
+        return
+
+    expiration_date = datetime.now() + timedelta(days=days)
+    expiration_iso = expiration_date.isoformat()
+    
+    # Load Existing
+    if os.path.exists(TEMP_ROLES_FILE):
+        with open(TEMP_ROLES_FILE, "r") as f:
+            try:
+                temp_data = json.load(f)
+            except:
+                temp_data = []
+    else:
+        temp_data = []
+
+    assigned_names = []
+    for member in members:
+        await member.add_roles(role)
+        assigned_names.append(member.display_name)
+        
+        # Add to tracking
+        temp_data.append({
+            "user_id": member.id,
+            "role_id": role.id,
+            "expires_at": expiration_iso
+        })
+
+    # Save
+    with open(TEMP_ROLES_FILE, "w") as f:
+        json.dump(temp_data, f)
+        
+    await ctx.send(f"✅ Rol **{role.name}** asignado a {', '.join(assigned_names)} por **{days} días** (Hasta: {expiration_date.strftime('%Y-%m-%d')}).")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def addEmoji(ctx, name: str, url: str = None):
+    # Logic: If URL is provided use it, otherwise check for attachment
+    image_bytes = None
+    
+    if ctx.message.attachments:
+        url = ctx.message.attachments[0].url
+    
+    if not url:
+        await ctx.send("❌ Debes proporcionar una URL o adjuntar una imagen.")
+        return
+        
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                await ctx.send("❌ No pude descargar la imagen.")
+                return
+            image_bytes = await resp.read()
+
+    try:
+        emoji = await ctx.guild.create_custom_emoji(name=name, image=image_bytes)
+        await ctx.send(f"✅ Emoji creado: {emoji}")
+    except Exception as e:
+        await ctx.send(f"❌ Error al crear emoji: {e}")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_roles(ctx):
-    # FEATURE 2: AUTO ROLES SETUP COMMAND
     embed = discord.Embed(title="🎭 Auto-asignación de Roles", description="Haz click en los botones para obtener tus roles.", color=0x00ff00)
     await ctx.send(embed=embed, view=PersistentRoleView())
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_voice(ctx):
-    # Helper to create the trigger channel if missing
     guild = ctx.guild
     category = discord.utils.get(guild.categories, name="🎮 GAMING")
     if category:
@@ -286,18 +381,15 @@ async def setup_voice(ctx):
 
 @bot.command(aliases=["gaming"])
 async def Gaming(ctx):
-    # FEATURE 5: GAMING ALERT
-    # Restriction: Only in #chat-gaming
     if ctx.channel.name != "chat-gaming":
         try:
-            await ctx.message.delete() # Delete the user's message
+             await ctx.message.delete() 
         except:
-            pass # Ignore if permission missing
-        await ctx.send("❌ Este comando solo funciona en #chat-gaming.", delete_after=300) # 5 minutes
+             pass 
+        await ctx.send("❌ Este comando solo funciona en #chat-gaming.", delete_after=300)
         return
 
     guild = ctx.guild
-    # Find Category
     category = discord.utils.get(guild.categories, name="🎮 GAMING")
     if not category:
         category = discord.utils.get(guild.categories, name="GAMING")
@@ -306,11 +398,7 @@ async def Gaming(ctx):
         await ctx.send("❌ No encuentro la categoría GAMING.")
         return
 
-    # Target is current channel (since we restricted it)
     target_channel = ctx.channel
-    
-    # Send Message
-    # Find Role Gamers
     role_gamers = discord.utils.get(guild.roles, name="Gamers")
     mention = role_gamers.mention if role_gamers else "@everyone"
     
@@ -318,22 +406,17 @@ async def Gaming(ctx):
 
 @bot.event
 async def on_presence_update(before, after):
-    # FEATURE 6: STREAM ALERT
-    # User must have "Gamers" role
     role_gamers = discord.utils.get(after.guild.roles, name="Gamers")
     if role_gamers not in after.roles:
         return
 
-    # Check if started streaming
     is_streaming = isinstance(after.activity, discord.Streaming)
     was_streaming = isinstance(before.activity, discord.Streaming)
 
     if is_streaming and not was_streaming:
-        # User started streaming
         stream_url = after.activity.url
-        stream_name = after.activity.name # e.g. "Playing Minecraft" or stream title
+        stream_name = after.activity.name 
         
-        # Find #chat-gaming
         category = discord.utils.get(after.guild.categories, name="🎮 GAMING")
         if not category:
              category = discord.utils.get(after.guild.categories, name="GAMING")

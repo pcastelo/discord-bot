@@ -40,6 +40,8 @@ Estos comandos son para configuración inicial y mantenimiento.
 - **`!setup_roles`**: Crea el panel de botones para auto-asignarse roles.
 - **`!setup_voice`**: Crea el canal generador de salas.
 - **`!clear [n]`**: Borra los últimos `n` mensajes del chat (Ej: `!clear 10`).
+- **`!tempRole "Rol" @Users 7`**: Asigna un rol (ej: "Vip") a usuarios por X días.
+- **`!addEmoji nombre [URL/Adjunto]`**: Roba un emoji desde un enlace o subiendo la foto.
 
 ---
 

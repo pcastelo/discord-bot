@@ -33,12 +33,20 @@ Desplegado en VPS (Docker).
 - **`!help`:** Embed dinámico con ayuda visual.
 - **`!clear`:** Herramienta de moderación para limpiar mensajes.
 
-### 5. Estadísticas en Tiempo Real
+### 5. Automatización Avanzada (Admin)
+- **Roles Temporales (`!tempRole`):**
+    - Asigna roles por un número de días determinado.
+    - Persistencia en `temp_roles.json` (sobrevive reinicios).
+    - Verificación automática cada 1 hora.
+- **Gestión de Emojis (`!addEmoji`):**
+    - Permite añadir emojis desde URLs externas o adjuntos directamente.
+
+### 6. Estadísticas en Tiempo Real
 - **Ubicación:** Canales de voz (bloqueados) en categoría INFORMACIÓN.
 - **Métricas:** `👥 Miembros`, `🟢 Online`, `🎧 Activos`.
 - **Actualización:** Cada 6 minutos (Loop task).
 
-### 6. Gaming Hub (`#chat-gaming`)
+### 7. Gaming Hub (`#chat-gaming`)
 - **Comando `!gaming`:**
     - **Uso:** `!gaming` (o `!Gaming`).
     - **Efecto:** Menciona al rol `@Gamers` con un mensaje de "Gaming Time".
@@ -47,7 +55,7 @@ Desplegado en VPS (Docker).
     - **Trigger:** Un usuario con rol `Gamers` comienza a transmitir (Twitch/YouTube).
     - **Acción:** Envía un aviso automático a `#chat-gaming` con el link del stream.
 
-### 7. Soporte Multi-Servidor ("Open Source Santiago")
+### 8. Soporte Multi-Servidor ("Open Source Santiago")
 - **Capacidad:** El proyecto incluye scripts de mantenimiento para un segundo servidor.
 - **Funciones:**
     - Reorganización de canales (Script `scripts/`).

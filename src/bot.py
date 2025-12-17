@@ -188,5 +188,37 @@ async def setup_voice(ctx):
     else:
         await ctx.send("No encuentro la categoría GAMING.")
 
+@bot.command()
+async def Gaming(ctx):
+    # FEATURE 5: GAMING ALERT
+    guild = ctx.guild
+    # Find Category
+    category = discord.utils.get(guild.categories, name="🎮 GAMING")
+    if not category:
+        category = discord.utils.get(guild.categories, name="GAMING")
+    
+    if not category:
+        await ctx.send("❌ No encuentro la categoría GAMING.")
+        return
+
+    # Find or Create Text Channel in Category
+    # Check if there is any text channel
+    target_channel = next((c for c in category.text_channels), None)
+    
+    if not target_channel:
+        # Create one if none exists
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+        }
+        target_channel = await guild.create_text_channel("chat-gaming", category=category, overwrites=overwrites)
+    
+    # Send Message
+    await target_channel.send(f"🎮 **Gaming Time** @everyone by {ctx.author.mention}!")
+    
+    # Feedback to user if they ran it elsewhere
+    if ctx.channel != target_channel:
+        await ctx.message.delete()
+        await ctx.send(f"✅ Alerta enviada en {target_channel.mention}", delete_after=5)
+
 if __name__ == "__main__":
     bot.run(TOKEN)

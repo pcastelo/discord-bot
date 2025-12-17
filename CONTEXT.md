@@ -19,7 +19,8 @@ Desplegado en VPS (Docker).
 
 ### 2. Auto-Roles (Botones)
 - **Ubicación:** Canal `#roles`.
-- **Roles:** `Gamers`, `Estudio`, `Invitados`.
+- **Roles:** `Gamers`, `Estudio`.
+- **Nota:** El rol "Invitados" ha sido deprecado. Los permisos base de `@everyone` ahora cubren la funcionalidad de invitados (ver Información, Social, Gaming General).
 - **Persistencia:** Los botones funcionan tras reinicios del bot.
 
 ### 3. Voz Dinámica

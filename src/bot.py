@@ -162,6 +162,16 @@ class SuperBot(commands.Bot):
         else:
             if chan_online.name != f"🟢 Online: {online_count}":
                 await chan_online.edit(name=f"🟢 Online: {online_count}")
+        
+        # Stat 3: Voice (Activos)
+        voice_count = sum(len(vc.members) for vc in guild.voice_channels)
+        chan_voice = discord.utils.find(lambda c: c.name.startswith("🎧 Activos:"), category.channels)
+        if not chan_voice:
+            overwrites = {guild.default_role: discord.PermissionOverwrite(connect=False)}
+            chan_voice = await guild.create_voice_channel(f"🎧 Activos: {voice_count}", category=category, overwrites=overwrites)
+        else:
+            if chan_voice.name != f"🎧 Activos: {voice_count}":
+                await chan_voice.edit(name=f"🎧 Activos: {voice_count}")
 
 bot = SuperBot()
 

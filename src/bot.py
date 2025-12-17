@@ -24,68 +24,74 @@ intents.voice_states = True
 intents.guilds = True
 intents.presences = True
 
-class NotificationView(View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
     async def toggle_role(self, interaction: discord.Interaction, role_name: str, emoji: str):
         role = discord.utils.get(interaction.guild.roles, name=role_name)
         if not role:
-            # Auto-create if missing (Security: not mentionable by public)
+            # Auto-create if missing. mentionable=False is safer for alerts, 
+            # but for Gaming/Social we might want mentions.
+            # We'll assume Newsletter/Downtime are strict alerts (False) and others might exist.
             role = await interaction.guild.create_role(name=role_name, mentionable=False, reason="Auto-created Notification Role")
         
         if role in interaction.user.roles:
             await interaction.user.remove_roles(role)
-            await interaction.response.send_message(f"❌ Notificaciones de **{role_name}** desactivadas.", ephemeral=True)
+            await interaction.response.send_message(f"🔕 Ya no recibirás notificaciones de **{role_name}**.", ephemeral=True)
         else:
             await interaction.user.add_roles(role)
-            await interaction.response.send_message(f"✅ {emoji} Notificaciones de **{role_name}** activadas.", ephemeral=True)
+            await interaction.response.send_message(f"🔔 Notificaciones de **{role_name}** activadas.", ephemeral=True)
 
-    @discord.ui.button(label="Downtime", style=discord.ButtonStyle.danger, custom_id="notif_downtime", emoji="🛑")
-    async def downtime_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role(interaction, "Downtime", "🛑")
+    @discord.ui.button(label="Gaming Pings", style=discord.ButtonStyle.primary, custom_id="notif_gaming", emoji="🎮")
+    async def gaming_button(self, interaction: discord.Interaction, button: Button):
+        # Maps to 'Gamers' role
+        await self.toggle_role(interaction, "Gamers", "🎮")
 
-    @discord.ui.button(label="Newsletter", style=discord.ButtonStyle.primary, custom_id="notif_newsletter", emoji="📰")
+    @discord.ui.button(label="Social Pings", style=discord.ButtonStyle.success, custom_id="notif_social", emoji="🗣️")
+    async def social_button(self, interaction: discord.Interaction, button: Button):
+        # Maps to 'Invitados' or new 'Social' role? Let's use 'Invitados' as proxy or create 'Social'
+        await self.toggle_role(interaction, "Social", "🗣️")
+
+    @discord.ui.button(label="Newsletter", style=discord.ButtonStyle.secondary, custom_id="notif_newsletter", emoji="📰")
     async def newsletter_button(self, interaction: discord.Interaction, button: Button):
         await self.toggle_role(interaction, "Newsletter", "📰")
-
-    @discord.ui.button(label="Releases", style=discord.ButtonStyle.success, custom_id="notif_releases", emoji="🚀")
-    async def releases_button(self, interaction: discord.Interaction, button: Button):
-        await self.toggle_role(interaction, "Releases", "🚀")
+    
+    @discord.ui.button(label="Silenciar Todo", style=discord.ButtonStyle.danger, custom_id="notif_silence", emoji="🔇")
+    async def silence_all(self, interaction: discord.Interaction, button: Button):
+        # Remove all notification roles
+        roles_to_remove = ["Gamers", "Social", "Newsletter", "Downtime", "Releases"]
+        removed = []
+        for r_name in roles_to_remove:
+            role = discord.utils.get(interaction.guild.roles, name=r_name)
+            if role and role in interaction.user.roles:
+                await interaction.user.remove_roles(role)
+                removed.append(r_name)
+        
+        if removed:
+            await interaction.response.send_message(f"🔇 Se han desactivado: {', '.join(removed)}", ephemeral=True)
+        else:
+            await interaction.response.send_message("🤷 No tenías ninguna notificación activa.", ephemeral=True)
 
 class PersistentRoleView(View):
     def __init__(self):
         super().__init__(timeout=None) # Persistent
 
-    @discord.ui.button(label="🎮 Gamers", style=discord.ButtonStyle.primary, custom_id="role_gamers", emoji="🎮")
+    # Keeping original role view for setup_roles if needed, but Notifications covers pings now.
+    # We will leave setup_roles as "Category/Access" roles and setup_notifications as "Ping" roles.
+    @discord.ui.button(label="Gamers", style=discord.ButtonStyle.primary, custom_id="role_gamers_access", emoji="🎮")
     async def gamer_button(self, interaction: discord.Interaction, button: Button):
-        role = discord.utils.get(interaction.guild.roles, name="Gamers")
-        if role in interaction.user.roles:
-            await interaction.user.remove_roles(role)
-            await interaction.response.send_message("❌ Rol **Gamers** eliminado.", ephemeral=True)
-        else:
-            await interaction.user.add_roles(role)
-            await interaction.response.send_message("✅ Rol **Gamers** añadido.", ephemeral=True)
+        await self.toggle_role_access(interaction, "Gamers")
 
-    @discord.ui.button(label="📚 Estudio", style=discord.ButtonStyle.success, custom_id="role_estudio", emoji="📚")
+    @discord.ui.button(label="Estudio", style=discord.ButtonStyle.success, custom_id="role_estudio_access", emoji="📚")
     async def estudio_button(self, interaction: discord.Interaction, button: Button):
-        role = discord.utils.get(interaction.guild.roles, name="Estudio")
-        if role in interaction.user.roles:
-            await interaction.user.remove_roles(role)
-            await interaction.response.send_message("❌ Rol **Estudio** eliminado.", ephemeral=True)
-        else:
-            await interaction.user.add_roles(role)
-            await interaction.response.send_message("✅ Rol **Estudio** añadido.", ephemeral=True)
+        await self.toggle_role_access(interaction, "Estudio")
+        
+    async def toggle_role_access(self, interaction, role_name):
+         role = discord.utils.get(interaction.guild.roles, name=role_name)
+         if role in interaction.user.roles:
+             await interaction.user.remove_roles(role)
+             await interaction.response.send_message(f"❌ Rol **{role_name}** eliminado.", ephemeral=True)
+         else:
+             await interaction.user.add_roles(role)
+             await interaction.response.send_message(f"✅ Rol **{role_name}** añadido.", ephemeral=True)
 
-    @discord.ui.button(label="👋 Invitados", style=discord.ButtonStyle.secondary, custom_id="role_invitados", emoji="👋")
-    async def invitados_button(self, interaction: discord.Interaction, button: Button):
-        role = discord.utils.get(interaction.guild.roles, name="Invitados")
-        if role in interaction.user.roles:
-            await interaction.user.remove_roles(role)
-            await interaction.response.send_message("❌ Rol **Invitados** eliminado.", ephemeral=True)
-        else:
-            await interaction.user.add_roles(role)
-            await interaction.response.send_message("✅ Rol **Invitados** añadido.", ephemeral=True)
 
 class SuperBot(commands.Bot):
     def __init__(self):
@@ -106,16 +112,8 @@ class SuperBot(commands.Bot):
         if not self.check_temp_roles.is_running():
             self.check_temp_roles.start()
         
-        # SECURITY: Disable @everyone mentions for strict safety
-        guild = self.get_guild(GUILD_ID)
-        if guild:
-            everyone_role = guild.default_role
-            if everyone_role.permissions.mention_everyone:
-                try:
-                    await everyone_role.edit(mention_everyone=False, reason="Security Hardening: Disable global ping")
-                    print("🔒 Security: Disabled @everyone ping for default role.")
-                except Exception as e:
-                    print(f"⚠️ Could not lock @everyone: {e}")
+        # NOTE: User explicitly requested to NOT disable mention_everyone automatically.
+        # Reverted Security block.
 
         print("Bot is Ready!")
 

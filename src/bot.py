@@ -90,7 +90,14 @@ class SuperBot(commands.Bot):
             background.text((260, 200), f"A LA VILLA", color="white", font=poppins_small)
 
             file = discord.File(fp=background.image_bytes, filename="welcome.png")
-            await channel.send(f"Hola {member.mention}, bienvenido al servidor!", file=file)
+            
+            # Find roles channel for mention
+            roles_channel = discord.utils.get(member.guild.text_channels, name="roles")
+            welcome_text = f"Hola {member.mention}, bienvenido al servidor!"
+            if roles_channel:
+                welcome_text += f"\nNo olvides pasar por {roles_channel.mention} para asignarte tus roles."
+            
+            await channel.send(welcome_text, file=file)
 
     async def on_voice_state_update(self, member, before, after):
         # FEATURE 3: DYNAMIC VOICE CHANNELS

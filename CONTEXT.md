@@ -72,9 +72,15 @@ Desplegado en VPS (Docker).
     - Reparación de Onboarding (Docs).
     - Gestión de Roles masiva.
 
+### 9. Zona de Administración (`🔒 ADMIN`)
+- **Categoría Oculta**: Solo visible para Administradores.
+- **Canales**:
+    - `#sudo`: Canal de texto para comandos de mantenimiento y logs discretos.
+    - `🔊 sudo`: Canal de voz privado (Mover manualmente si es necesario).
+
 ## Comandos de Mantenimiento (Admin)
-- `!setup_roles`: Despliega el panel de botones (Solo Admin).
-- `!setup_voice`: Configura el canal generador de salas (Solo Admin).
+- `!setup_roles`: Despliega el panel de botones (Auto-borrado).
+- `!setup_voice`: Configura el canal generador de salas (Auto-borrado).
 
 ## Despliegue y Mantenimiento
 - **Repositorio:** `https://github.com/pcastelo/discord-bot`

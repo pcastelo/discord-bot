@@ -188,7 +188,7 @@ async def setup_voice(ctx):
     else:
         await ctx.send("No encuentro la categoría GAMING.")
 
-@bot.command()
+@bot.command(aliases=["gaming"])
 async def Gaming(ctx):
     # FEATURE 5: GAMING ALERT
     # Restriction: Only in #chat-gaming

@@ -191,6 +191,11 @@ async def setup_voice(ctx):
 @bot.command()
 async def Gaming(ctx):
     # FEATURE 5: GAMING ALERT
+    # Restriction: Only in #chat-gaming
+    if ctx.channel.name != "chat-gaming":
+        await ctx.send("❌ Este comando solo funciona en #chat-gaming.", delete_after=5)
+        return
+
     guild = ctx.guild
     # Find Category
     category = discord.utils.get(guild.categories, name="🎮 GAMING")
@@ -201,16 +206,8 @@ async def Gaming(ctx):
         await ctx.send("❌ No encuentro la categoría GAMING.")
         return
 
-    # Find or Create Text Channel in Category
-    # Check if there is any text channel
-    target_channel = next((c for c in category.text_channels), None)
-    
-    if not target_channel:
-        # Create one if none exists
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=True, send_messages=True)
-        }
-        target_channel = await guild.create_text_channel("chat-gaming", category=category, overwrites=overwrites)
+    # Target is current channel (since we restricted it)
+    target_channel = ctx.channel
     
     # Send Message
     # Find Role Gamers
@@ -218,11 +215,6 @@ async def Gaming(ctx):
     mention = role_gamers.mention if role_gamers else "@everyone"
     
     await target_channel.send(f"🎮 **Gaming Time** {mention} by {ctx.author.mention}!")
-    
-    # Feedback to user if they ran it elsewhere
-    if ctx.channel != target_channel:
-        await ctx.message.delete()
-        await ctx.send(f"✅ Alerta enviada en {target_channel.mention}", delete_after=5)
 
 if __name__ == "__main__":
     bot.run(TOKEN)

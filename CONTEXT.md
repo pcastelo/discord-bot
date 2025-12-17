@@ -28,8 +28,8 @@ Desplegado en VPS (Docker).
 
 ### 4. Estadísticas en Tiempo Real
 - **Ubicación:** Canales de voz (bloqueados) en categoría INFORMACIÓN.
-- **Métricas:** `👥 Miembros`, `🟢 Online`.
-- **Actualización:** Cada 10 minutos (Loop task).
+- **Métricas:** `👥 Miembros`, `🟢 Online`, `🎧 Activos`.
+- **Actualización:** Cada 6 minutos (Loop task).
 
 ### 5. Gaming Hub (`#chat-gaming`)
 - **Comando `!gaming`:**
@@ -39,6 +39,13 @@ Desplegado en VPS (Docker).
 - **Alertas de Stream:**
     - **Trigger:** Un usuario con rol `Gamers` comienza a transmitir (Twitch/YouTube).
     - **Acción:** Envía un aviso automático a `#chat-gaming` con el link del stream.
+
+### 6. Soporte Multi-Servidor ("Open Source Santiago")
+- **Capacidad:** El proyecto incluye scripts de mantenimiento para un segundo servidor.
+- **Funciones:**
+    - Reorganización de canales (Script `scripts/`).
+    - Reparación de Onboarding (Docs).
+    - Gestión de Roles masiva.
 
 ## Comandos de Mantenimiento (Admin)
 - `!setup_roles`: Despliega el panel de botones (Solo Admin).

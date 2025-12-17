@@ -19,7 +19,7 @@ Avisa a todos los **Gamers** para jugar.
 | **👋 Bienvenida** | Te saluda con una imagen personalizada al entrar. |
 | **🎙️ Crear Sala** | Únete al canal de voz **"➕ Crear Sala"** para crear tu propio canal de voz temporal. |
 | **📺 Alerta Stream** | Si tienes el rol `Gamers` y prendes stream (Twitch/YouTube), el bot avisa en `#chat-gaming`. |
-| **📊 Estadísticas** | Mira cuánta gente hay conectada en los canales de arriba (`Miembros` / `Online`). |
+| **📊 Estadísticas** | Contadores en tiempo real: `Miembros`, `Online` y `🎧 Voz` (se actualiza cada 6 min). |
 
 ---
 

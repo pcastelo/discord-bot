@@ -416,6 +416,7 @@ async def addSound(ctx, name: str):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_roles(ctx):
+    await ctx.message.delete()
     embed = discord.Embed(title="🎭 Roles de Identidad", description="Elige tus roles para acceder a los canales.", color=0x00ff00)
     embed.add_field(name="Roles", value="🎮 **Gamers**: Canales de juegos.\n📚 **Estudio**: Zona de concentración.", inline=False)
     await ctx.send(embed=embed, view=RoleIdentityView())
@@ -423,6 +424,7 @@ async def setup_roles(ctx):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_notifications(ctx):
+    await ctx.message.delete()
     embed = discord.Embed(title="🔔 Notificaciones del Sistema", description="Suscríbete a las alertas que te interesen.", color=0xe74c3c)
     embed.add_field(name="Alertas", value="📰 **Newsletter**: Novedades del proyecto.\n🛑 **Downtime**: Avisos de mantenimiento.\n🚀 **Releases**: Nuevas features del bot.", inline=False)
     await ctx.send(embed=embed, view=SystemNotificationView())
@@ -430,6 +432,7 @@ async def setup_notifications(ctx):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_voice(ctx):
+    await ctx.message.delete()
     guild = ctx.guild
     category = discord.utils.get(guild.categories, name="🎮 GAMING")
     if category:

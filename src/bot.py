@@ -155,9 +155,15 @@ class SuperBot(commands.Bot):
 
         # 2. DELETE EMPTY TEMPORARY CHANNEL
         if before.channel and (before.channel.name.startswith("Sala de ") or before.channel.name.startswith("🔊 ")): 
-            if len(before.channel.members) == 0:
+            # SAFETY GUARD: Never delete channels with these keywords
+            excluded_keywords = ["COD", "BF6", "Equipo", "General", "Estudio", "AFK", "Gaming"]
+            is_protected = any(kw.lower() in before.channel.name.lower() for kw in excluded_keywords)
+            
+            if len(before.channel.members) == 0 and not is_protected:
                 await before.channel.delete()
                 print(f"Deleted empty temp channel: {before.channel.name}")
+            elif is_protected and len(before.channel.members) == 0:
+                 print(f"🚫 Skipped deletion of protected channel: {before.channel.name}")
 
     @tasks.loop(minutes=6)
     async def update_stats(self):
@@ -298,6 +304,11 @@ async def room(ctx, *, new_name):
         return
 
     channel = ctx.author.voice.channel
+    
+    # Check if it is a temp channel
+    if not (channel.name.startswith("Sala de ") or channel.name.startswith("🔊 ")):
+         await ctx.send("❌ Solo puedes renombrar salas temporales creadas por el bot.", delete_after=5)
+         return
     permissions = channel.permissions_for(ctx.author)
     if not permissions.manage_channels:
          await ctx.send("❌ No eres el dueño de esta sala.", delete_after=5)

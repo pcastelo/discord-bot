@@ -1,34 +1,36 @@
 from easy_pil import Editor, Canvas, Font, load_image_async
 import asyncio
-import os
+def get_ordinal(n):
+    if 11 <= (n % 100) <= 13: suffix = 'th'
+    else: suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return f"{n}{suffix}"
 
 async def generate_preview():
-    # 1. Background (Dark) - Increased Height to 350
-    background = Editor(Canvas((900, 350), color="#23272A"))
+    # 1. Background (Dark) - Maintain 350 height for spacing OR revert to 250 if compact?
+    # The reference image is compact. Let's try 300.
+    background = Editor(Canvas((900, 300), color="#23272A"))
     
     # Text Fonts
     poppins = Font.poppins(size=50, variant="bold")
+    poppins_med = Font.poppins(size=40, variant="bold")
     poppins_small = Font.poppins(size=30, variant="light")
 
-    # 3. Avatar (Re-positioned to y=80 for vertical center)
+    # 2. Avatar (Left side, big)
+    # Centered vertically in 300px is y=150. Radius 95 (190 size).
     profile = Editor(Canvas((190, 190), color="#5865F2")).circle_image()
-    background.paste(profile, (30, 80))
-    background.ellipse((30, 80), 190, 190, outline="#00ff00", stroke_width=5)
+    background.paste(profile, (30, 55)) # y=55 to center in 300 (300-190=110/2=55)
+    background.ellipse((30, 55), 190, 190, outline="#00ff00", stroke_width=5)
     
-    # Text Elements
-    background.text((260, 60), "BIENVENIDO", color="white", font=poppins)
-    background.text((260, 120), "User_Preview", color="#00ff00", font=poppins)
-    background.text((260, 180), "A LA VILLA", color="white", font=poppins_small)
-
-    # 2. Logo Logic (Below Text)
-    logo_path = "assets/villa-castelo.png"
-    if os.path.exists(logo_path):
-        # Resize to fit nicely below text
-        logo = Editor(logo_path).resize((350, 110))
-        background.paste(logo, (260, 230)) # Below "A LA VILLA"
-        print("Logo pasted at bottom.")
-    else:
-        print("Logo NOT found.")
+    # 3. Text Elements
+    # Mock Data
+    member_name = "Villero#3399"
+    guild_name = "La Villa"
+    ordinal = get_ordinal(216)
+    
+    # Layout: Right of avatar (starts approx x=250)
+    background.text((250, 60), f"Welcome {member_name}", color="white", font=poppins)
+    background.text((250, 120), f"to {guild_name}", color="#00ff00", font=poppins_med)
+    background.text((250, 180), f"you are the {ordinal} user", color="white", font=poppins_small)
 
     background.save("preview_welcome.png")
     print("Preview saved to preview_welcome.png")

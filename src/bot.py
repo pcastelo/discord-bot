@@ -129,41 +129,45 @@ class SuperBot(commands.Bot):
 
         print("Bot is Ready!")
 
+def get_ordinal(n):
+    if 11 <= (n % 100) <= 13: suffix = 'th'
+    else: suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return f"{n}{suffix}"
+
     async def on_member_join(self, member):
         # FEATURE 1: WELCOME IMAGES
         channel = discord.utils.get(member.guild.text_channels, name="bienvenida")
         if channel:
-            # Create Image
-            # Create Image
-            background = Editor(Canvas((900, 350), color="#23272A"))
-            
-            # Add Logo/Title Image if exists
-            logo_path = "assets/villa-castelo.png"
-            if not os.path.exists(logo_path):
-                 logo_path = "welcome_bg.png"
-            
-            if os.path.exists(logo_path):
-                 # Resize to reasonable Logo/Title size (e.g. 350px wide)
-                 logo = Editor(logo_path).resize((350, 110))
-                 background.paste(logo, (260, 230)) # Bottom
+            # Create Image - Member Count Style
+            background = Editor(Canvas((900, 300), color="#23272A"))
             
             profile_image = await load_image_async(str(member.display_avatar.url))
             profile = Editor(profile_image).resize((190, 190)).circle_image()
             
             poppins = Font.poppins(size=50, variant="bold")
+            poppins_med = Font.poppins(size=40, variant="bold")
             poppins_small = Font.poppins(size=30, variant="light")
 
-            background.paste(profile, (30, 80))
-            background.ellipse((30, 80), 190, 190, outline="#00ff00", stroke_width=5)
-            background.text((260, 60), "BIENVENIDO", color="white", font=poppins)
-            background.text((260, 120), f"{member.name}", color="#00ff00", font=poppins)
-            background.text((260, 180), f"A LA VILLA", color="white", font=poppins_small)
+            # Left Avatar (Centered in 300px height is y=55)
+            background.paste(profile, (30, 55))
+            background.ellipse((30, 55), 190, 190, outline="#00ff00", stroke_width=5)
+            
+            # Text Elements
+            guild_name = member.guild.name
+            ordinal = get_ordinal(member.guild.member_count)
+            
+            background.text((250, 60), f"Welcome {member.name}", color="white", font=poppins)
+            background.text((250, 120), f"to {guild_name}", color="#00ff00", font=poppins_med)
+            background.text((250, 180), f"you are the {ordinal} user", color="white", font=poppins_small)
 
             file = discord.File(fp=background.image_bytes, filename="welcome.png")
             
             # Find roles channel for mention
             roles_channel = discord.utils.get(member.guild.text_channels, name="roles")
-            welcome_text = f"Hola {member.mention}, bienvenido al servidor!"
+            
+            # New Message Format
+            welcome_text = f"Welcome {member.mention} to **{guild_name}**. You are the **{ordinal}** user!"
+            
             if roles_channel:
                 welcome_text += f"\nNo olvides pasar por {roles_channel.mention} para asignarte tus roles."
             

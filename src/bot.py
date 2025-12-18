@@ -17,6 +17,11 @@ GUILD_ID = int(os.getenv('GUILD_ID'))
 TEMP_ROLES_FILE = "temp_roles.json"
 TEMP_CHANNELS_FILE = "temp_voice_channels.json"
 
+def get_ordinal(n):
+    if 11 <= (n % 100) <= 13: suffix = 'th'
+    else: suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return f"{n}{suffix}"
+
 def load_temp_channels():
     if not os.path.exists(TEMP_CHANNELS_FILE):
         return []
@@ -128,11 +133,6 @@ class SuperBot(commands.Bot):
         # Reverted Security block.
 
         print("Bot is Ready!")
-
-def get_ordinal(n):
-    if 11 <= (n % 100) <= 13: suffix = 'th'
-    else: suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
-    return f"{n}{suffix}"
 
     async def on_member_join(self, member):
         # FEATURE 1: WELCOME IMAGES

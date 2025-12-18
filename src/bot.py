@@ -216,7 +216,9 @@ def get_ordinal(n):
         if not guild: return
 
         member_count = guild.member_count
-        online_count = sum(1 for m in guild.members if m.status != discord.Status.offline and not m.bot)
+        online_members = [m for m in guild.members if m.status != discord.Status.offline and not m.bot]
+        online_count = len(online_members)
+        print(f"DEBUG STATS: Online Humans ({online_count}): {[m.name for m in online_members]}")
         
         category = discord.utils.get(guild.categories, name="📌 INFORMACIÓN")
         if not category: return
@@ -240,7 +242,10 @@ def get_ordinal(n):
                 await chan_online.edit(name=f"🟢 Online: {online_count}")
         
         # Stat 3: Voice (Activos)
-        voice_count = sum(len(vc.members) for vc in guild.voice_channels)
+        voice_members = [m for vc in guild.voice_channels for m in vc.members if not m.bot]
+        voice_count = len(voice_members)
+        print(f"DEBUG STATS: Voice Humans ({voice_count}): {[m.name for m in voice_members]}")
+
         chan_voice = discord.utils.find(lambda c: c.name.startswith("🎧 Activos:"), category.channels)
         if not chan_voice:
             overwrites = {guild.default_role: discord.PermissionOverwrite(connect=False)}

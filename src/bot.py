@@ -134,7 +134,15 @@ class SuperBot(commands.Bot):
         channel = discord.utils.get(member.guild.text_channels, name="bienvenida")
         if channel:
             # Create Image
-            background = Editor(Canvas((900, 270), color="#23272A"))
+            background_path = "assets/villa-castelo.png"
+            if not os.path.exists(background_path):
+                 background_path = "welcome_bg.png"
+            
+            if os.path.exists(background_path):
+                 background = Editor(background_path).resize((900, 270))
+            else:
+                 background = Editor(Canvas((900, 270), color="#23272A"))
+            
             profile_image = await load_image_async(str(member.display_avatar.url))
             profile = Editor(profile_image).resize((190, 190)).circle_image()
             

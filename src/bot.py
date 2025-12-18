@@ -15,6 +15,32 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD_ID = int(os.getenv('GUILD_ID'))
 TEMP_ROLES_FILE = "temp_roles.json"
+TEMP_CHANNELS_FILE = "temp_voice_channels.json"
+
+def load_temp_channels():
+    if not os.path.exists(TEMP_CHANNELS_FILE):
+        return []
+    try:
+        with open(TEMP_CHANNELS_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_temp_channels(channels):
+    with open(TEMP_CHANNELS_FILE, "w") as f:
+        json.dump(channels, f)
+
+def add_temp_channel(channel_id):
+    channels = load_temp_channels()
+    if channel_id not in channels:
+        channels.append(channel_id)
+        save_temp_channels(channels)
+
+def remove_temp_channel(channel_id):
+    channels = load_temp_channels()
+    if channel_id in channels:
+        channels.remove(channel_id)
+        save_temp_channels(channels)
 
 # Intents
 intents = discord.Intents.default()
@@ -146,24 +172,26 @@ class SuperBot(commands.Bot):
                 member: discord.PermissionOverwrite(manage_channels=True, move_members=True)
             }
             
-            channel_name = f"Sala de {member.display_name}"
+            channel_name = f"🔊 Sala de {member.display_name}"
             new_channel = await guild.create_voice_channel(name=channel_name, category=category, overwrites=overwrites)
             
+            # TRACKING: Save ID
+            add_temp_channel(new_channel.id)
+
             # Move member
             await member.move_to(new_channel)
-            print(f"Created temp channel: {channel_name}")
+            print(f"Created temp channel: {channel_name} (ID: {new_channel.id})")
 
         # 2. DELETE EMPTY TEMPORARY CHANNEL
-        if before.channel and (before.channel.name.startswith("Sala de ") or before.channel.name.startswith("🔊 ")): 
-            # SAFETY GUARD: Never delete channels with these keywords
-            excluded_keywords = ["COD", "BF6", "Equipo", "General", "Estudio", "AFK", "Gaming"]
-            is_protected = any(kw.lower() in before.channel.name.lower() for kw in excluded_keywords)
+        if before.channel:
+            # Check if this channel is in our Tracking List
+            temp_ids = load_temp_channels()
             
-            if len(before.channel.members) == 0 and not is_protected:
-                await before.channel.delete()
-                print(f"Deleted empty temp channel: {before.channel.name}")
-            elif is_protected and len(before.channel.members) == 0:
-                 print(f"🚫 Skipped deletion of protected channel: {before.channel.name}")
+            if before.channel.id in temp_ids:
+                if len(before.channel.members) == 0:
+                    await before.channel.delete()
+                    remove_temp_channel(before.channel.id)
+                    print(f"Deleted empty temp channel: {before.channel.name} (ID: {before.channel.id})")
 
     @tasks.loop(minutes=6)
     async def update_stats(self):
@@ -305,8 +333,9 @@ async def room(ctx, *, new_name):
 
     channel = ctx.author.voice.channel
     
-    # Check if it is a temp channel
-    if not (channel.name.startswith("Sala de ") or channel.name.startswith("🔊 ")):
+    # Check if it is a temp channel (ID based)
+    temp_ids = load_temp_channels()
+    if channel.id not in temp_ids:
          await ctx.send("❌ Solo puedes renombrar salas temporales creadas por el bot.", delete_after=5)
          return
     permissions = channel.permissions_for(ctx.author)

@@ -134,14 +134,19 @@ class SuperBot(commands.Bot):
         channel = discord.utils.get(member.guild.text_channels, name="bienvenida")
         if channel:
             # Create Image
-            background_path = "assets/villa-castelo.png"
-            if not os.path.exists(background_path):
-                 background_path = "welcome_bg.png"
+            # Create Image
+            background = Editor(Canvas((900, 270), color="#23272A"))
             
-            if os.path.exists(background_path):
-                 background = Editor(background_path).resize((900, 270))
-            else:
-                 background = Editor(Canvas((900, 270), color="#23272A"))
+            # Add Logo/Title Image if exists
+            logo_path = "assets/villa-castelo.png"
+            if not os.path.exists(logo_path):
+                 logo_path = "welcome_bg.png"
+            
+            if os.path.exists(logo_path):
+                 # Resize to reasonable Logo/Title size (e.g. 350px wide)
+                 # We assume landscape title.
+                 logo = Editor(logo_path).resize((350, 110))
+                 background.paste(logo, (520, 20)) # Top right area
             
             profile_image = await load_image_async(str(member.display_avatar.url))
             profile = Editor(profile_image).resize((190, 190)).circle_image()

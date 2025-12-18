@@ -29,7 +29,7 @@ async def generate_preview():
     
     # Layout: Right of avatar (starts approx x=250)
     background.text((250, 60), f"Welcome {member_name}", color="white", font=poppins)
-    background.text((250, 120), f"to {guild_name}", color="#00ff00", font=poppins_med)
+    background.text((250, 120), f"to {guild_name}", color="#FF0000", font=poppins_med)
     background.text((250, 180), f"you are the {ordinal} user", color="white", font=poppins_small)
 
     background.save("preview_welcome.png")

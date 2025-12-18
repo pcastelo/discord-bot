@@ -157,7 +157,7 @@ class SuperBot(commands.Bot):
             ordinal = get_ordinal(member.guild.member_count)
             
             background.text((250, 60), f"Welcome {member.name}", color="white", font=poppins)
-            background.text((250, 120), f"to {guild_name}", color="#00ff00", font=poppins_med)
+            background.text((250, 120), f"to {guild_name}", color="#FF0000", font=poppins_med)
             background.text((250, 180), f"you are the {ordinal} user", color="white", font=poppins_small)
 
             file = discord.File(fp=background.image_bytes, filename="welcome.png")

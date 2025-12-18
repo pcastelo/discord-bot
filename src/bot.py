@@ -135,7 +135,7 @@ class SuperBot(commands.Bot):
         if channel:
             # Create Image
             # Create Image
-            background = Editor(Canvas((900, 270), color="#23272A"))
+            background = Editor(Canvas((900, 350), color="#23272A"))
             
             # Add Logo/Title Image if exists
             logo_path = "assets/villa-castelo.png"
@@ -144,9 +144,8 @@ class SuperBot(commands.Bot):
             
             if os.path.exists(logo_path):
                  # Resize to reasonable Logo/Title size (e.g. 350px wide)
-                 # We assume landscape title.
                  logo = Editor(logo_path).resize((350, 110))
-                 background.paste(logo, (520, 20)) # Top right area
+                 background.paste(logo, (260, 230)) # Bottom
             
             profile_image = await load_image_async(str(member.display_avatar.url))
             profile = Editor(profile_image).resize((190, 190)).circle_image()
@@ -154,11 +153,11 @@ class SuperBot(commands.Bot):
             poppins = Font.poppins(size=50, variant="bold")
             poppins_small = Font.poppins(size=30, variant="light")
 
-            background.paste(profile, (30, 40))
-            background.ellipse((30, 40), 190, 190, outline="#00ff00", stroke_width=5)
-            background.text((260, 80), "BIENVENIDO", color="white", font=poppins)
-            background.text((260, 140), f"{member.name}", color="#00ff00", font=poppins)
-            background.text((260, 200), f"A LA VILLA", color="white", font=poppins_small)
+            background.paste(profile, (30, 80))
+            background.ellipse((30, 80), 190, 190, outline="#00ff00", stroke_width=5)
+            background.text((260, 60), "BIENVENIDO", color="white", font=poppins)
+            background.text((260, 120), f"{member.name}", color="#00ff00", font=poppins)
+            background.text((260, 180), f"A LA VILLA", color="white", font=poppins_small)
 
             file = discord.File(fp=background.image_bytes, filename="welcome.png")
             
